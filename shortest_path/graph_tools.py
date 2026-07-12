@@ -324,4 +324,3 @@ def plotShortestPathTree(dfn, dfl, out, targets=None):
         plot.add_glyph(source, pois)
 
     show(plot)
-

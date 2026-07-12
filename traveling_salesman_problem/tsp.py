@@ -75,21 +75,51 @@ def solve_tsp(G):
     return get_routes(solution, routing, manager)[0]
 
 
-def create_etching_network(nodes:pd.DataFrame, **kw) -> nx.DiGraph:
-    """Return networkx graph derived from the list of nodes.
-
-    Return the graph representing the etching problem with
+def farthest_insertion(G, initial_tour=None):
+    """Return a tour created with the farthest-insertion heuristic.
 
     Args:
-        nodes (pd.DataFrame): Dataframe of nodes with positional columns
-        (x_start, e_end, y_start, y_end).
+        G (nx.Graph): NetworkX graph.
+        initial_tour (list[int], optional): Initial two-node tour. Defaults
+            to a tour containing the first and last nodes of ``G``.
+
+    Returns:
+        list[int]: A tour of the graph.
+    """
+    if initial_tour is None:
+        initial_tour = [0, len(G) - 1, 0]
+    return vinal.insertion(G, initial_tour=initial_tour, nearest=False)
+
+
+def farthest_insertion_plot(G, initial_tour=None, **kw):
+    """Return an interactive plot of the farthest-insertion heuristic."""
+    if initial_tour is None:
+        initial_tour = [0, len(G) - 1, 0]
+    tours = vinal.insertion(G, initial_tour=initial_tour,
+                            nearest=False, iterations=True)
+    edges = [[(tour[i], tour[i + 1]) for i in range(len(tour) - 1)]
+             for tour in tours]
+    costs = [tour_cost(G, tour) for tour in tours]
+    return vinal.plot._graph_iterations_plot(
+        G, nodes=tours, edges=edges, costs=costs, show_all_edges=False,
+        show_labels=False, **kw)
+
+
+def create_etching_network(nodes:pd.DataFrame, **kw) -> nx.DiGraph:
+    """Return a NetworkX graph derived from a list of etching nodes.
+
+    Args:
+        nodes (pd.DataFrame): DataFrame with positional columns
+            `x_start`, `x_end`, `y_start`, and `y_end`.
 
     Returns:
         nx.DiGraph: A directed graph.
     """
+    # Entry (i, j) is the travel distance after completing etching i:
+    # from the end of etching i to the start of etching j.
     A = distance_matrix(nodes,
-                        x_i='x_start', x_j='x_end',
-                        y_i='y_start', y_j='y_end')
+                        x_i='x_end', x_j='x_start',
+                        y_i='y_end', y_j='y_start')
     G = nx.from_numpy_array(A=A, create_using=nx.DiGraph)
     for attr in nodes.columns:
         nx.set_node_attributes(G, pd.Series(nodes[attr]).to_dict(), attr)

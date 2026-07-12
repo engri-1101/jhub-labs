@@ -12,12 +12,12 @@ class max_flow:
             G (nx.DiGraph): Directed graph with capacities cap and positions pos
         """
         self.G = G
-        self.set_initial_flow() # set intial flow
+        self.set_initial_flow() # set initial flow
         self.create_residual_graph() # create the residual graph
         self.pos = nx.get_node_attributes(self.G,'pos')
 
     def set_initial_flow(self):
-        """Set the intial flow on the graph G."""
+        """Set the initial flow on the graph G."""
         for i, j in self.G.edges:
             self.G.edges[i,j]['flow'] = 0
 
@@ -133,13 +133,13 @@ class max_flow:
                 self.G.edges[j,i]['flow'] = self.G.edges[j,i]['flow'] - delta
 
     def ford_fulkerson(self, s='s', t='t', show=False):
-        """Run all of Ford Fulkerson on this max flow insance."""
+        """Run the Ford-Fulkerson algorithm on this maximum-flow instance."""
         self.set_initial_flow()
         if show:
             self.plot_residual_graph()
         else:
             self.create_residual_graph()
-        self.label(s=s)  # run the labeling algorithm to find a s-t path in the residual graph
+        self.label(s=s)  # run the labeling algorithm to find an s-t path in the residual graph
         while self.G.nodes[t]["check"]: # while there is an s-t path in the residual graph
             path, delta = self.find_augmenting_path(s=s, t=t)
             self.update_flow(path, delta)  # update the flow
@@ -147,7 +147,7 @@ class max_flow:
                 self.plot_residual_graph()
             else:
                 self.create_residual_graph()
-            self.label(s=s)  # run the labeling algorithm to find a s-t path in the new residual graph
+            self.label(s=s)  # run the labeling algorithm to find an s-t path in the new residual graph
 
 def add_infinite_capacities(G):
     """Add infinite capacities on the arcs with no capacity given."""
